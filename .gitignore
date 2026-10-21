@@ -1,0 +1,9 @@
+node_modules/
+.verification-profile/
+.dsh/
+.env
+.env.*
+*.tgz
+*.log
+output/
+coverage/

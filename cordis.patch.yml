@@ -1,0 +1,10 @@
+# Register the Tabbit providers (CN + global) without changing the profile's
+# current default model. Both regions ride the same adapter and each one points
+# at its own built-in gateway by default. External gateways remain optional.
+#
+# The row id is the package name on purpose: it is the Loader entry id, and on
+# DSH 0.1.7+ the settings service keys a form by that id, so the id the Host
+# installs its section under has to be the name the browser half looks for.
+- insert:
+    - id: dsh-connect-tabbit
+      name: dsh-connect-tabbit
