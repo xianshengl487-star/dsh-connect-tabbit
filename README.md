@@ -3,9 +3,9 @@
 > **Turn your Tabbit browser quota into a free local model gateway for DeepSeek Harness — CN & Global editions, 20+ models, zero setup.**
 > 把 Tabbit 浏览器的模型额度变成 DeepSeek Harness 的内置网关：国内版 + 国际版、20+ 模型、Token 统计、每日签到、长任务续接。
 
-![tests](https://img.shields.io/badge/tests-72%2F72-brightgreen) ![live](https://img.shields.io/badge/live%20verified-CN%20full--chain-blue) ![editions](https://img.shields.io/badge/editions-CN%20%2B%20Global-orange) ![license](https://img.shields.io/badge/license-MIT-black)
+![tests](https://img.shields.io/badge/tests-72%2F72-brightgreen) ![live](https://img.shields.io/badge/live%20verified-CN%20%2B%20Global%20full--chain-blue) ![editions](https://img.shields.io/badge/editions-CN%20%2B%20Global-orange) ![license](https://img.shields.io/badge/license-MIT-black)
 
-**2026-10-24 实测记录**：72/72 单元测试通过；国内版全链路真实补全通过（网关→shim→DSH 适配器，23 模型 / 1 账号）；每日签到真实领取成功并二次确认；国际版双网关架构与目录缓存（20 模型）验证通过。
+**2026-10-24 实测记录**：72/72 单元测试通过；国内版全链路真实补全通过（网关→shim→DSH 适配器，23 模型 / 1 账号）；**国际版全链路真实补全通过**（34 模型 / 1 账号，浏览器登录态导入→账号池→网关→shim→适配器）；每日签到真实领取成功并二次确认；双网关并行与隔离登录窗口均实测（详见 [国际版上手](docs/global-edition-setup.md)）。
 
 插件内置网关，随 DSH 自动启动、随插件关闭，无需安装 Python / Docker，也不需要手动运行 8800 / 8801 服务。国内版与国际版使用独立的账号池、随机本机端口和随机密钥。
 
@@ -99,7 +99,7 @@ cn:
 
 `npm test` 使用模拟服务验证登录、原子导入、额度、界面、工具协议、区域隔离、附件上传与停止清理，不需要真实账号。
 
-真实账号验证记录见 [接口证据](docs/tabbit-api-evidence.md)。当前已验证国内版默认模型与 GLM-5.3-FlashX 工具往返，包含 95 个合成工具与超长历史；工具执行结果为模拟值。国际版尚无有效账号，未声称国际版模型调用成功。
+真实账号验证记录见 [接口证据](docs/tabbit-api-evidence.md)。当前已验证国内版默认模型与 GLM-5.3-FlashX 工具往返，包含 95 个合成工具与超长历史；工具执行结果为模拟值。国际版已于 2026-10-24 完成真实账号全链路验证（浏览器登录导入→账号池→网关→shim→DSH 适配器，34 模型，见 [国际版上手](docs/global-edition-setup.md)）。
 
 补充真实界面回归：在 DSH 的“Tabbit插件回归测试”会话中，由 GLM 实际调用 `computer_observe` 打开 B 站，再通过 `pwsh` 启动本机 Edge、记事本和计算器，并从真实工具结果核验窗口标题。此次不是模拟工具。0.2.1 另修复 Agent Loop 预备调用入口绕过未知用量过滤的问题。
 
