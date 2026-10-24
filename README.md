@@ -3,13 +3,33 @@
 > **Turn your Tabbit browser quota into a free local model gateway for DeepSeek Harness — CN & Global editions, 20+ models, zero setup.**
 > 把 Tabbit 浏览器的模型额度变成 DeepSeek Harness 的内置网关：国内版 + 国际版、20+ 模型、Token 统计、每日签到、长任务续接。
 
-![tests](https://img.shields.io/badge/tests-72%2F72-brightgreen) ![live](https://img.shields.io/badge/live%20verified-CN%20%2B%20Global%20full--chain-blue) ![editions](https://img.shields.io/badge/editions-CN%20%2B%20Global-orange) ![license](https://img.shields.io/badge/license-MIT-black)
+[![intro video](promo/bilibili-intro/cover.png)](promo/bilibili-intro/dsh-connect-tabbit-intro.mp4)
 
-**2026-10-24 实测记录**：72/72 单元测试通过；国内版全链路真实补全通过（网关→shim→DSH 适配器，23 模型 / 1 账号）；**国际版全链路真实补全通过**（34 模型 / 1 账号，浏览器登录态导入→账号池→网关→shim→适配器）；每日签到真实领取成功并二次确认；双网关并行与隔离登录窗口均实测（详见 [国际版上手](docs/global-edition-setup.md)）。
+![tests](https://img.shields.io/badge/tests-76%2F76-brightgreen) ![live](https://img.shields.io/badge/live%20verified-CN%20%2B%20Global%20full--chain-blue) ![editions](https://img.shields.io/badge/editions-CN%20%2B%20Global-orange) ![license](https://img.shields.io/badge/license-MIT-black)
 
-插件内置网关，随 DSH 自动启动、随插件关闭，无需安装 Python / Docker，也不需要手动运行 8800 / 8801 服务。国内版与国际版使用独立的账号池、随机本机端口和随机密钥。
+## 快速开始（三步）
 
-在 DSH → 设置 → 插件配置 → dsh-connect-tabbit 中登录或导入账号即可。卡片显示“内置网关 · 自动运行”。国际版需要独立的国际版账号，国内版登录态不能通用。
+1. **安装**：在 DSH 桌面版的插件市场或 `dsh plugin --profile desktop add` 安装本插件（或从本仓库 clone 后链接）。
+2. **登录 / 导入**：DSH → 设置 → 插件配置 → dsh-connect-tabbit → 登录 Tabbit（选国内版 / 国际版），或导入本机浏览器登录态。国际版三步指南见 [docs/global-edition-setup.md](docs/global-edition-setup.md)。
+3. **选模型开聊**：模型选择器里选 `tabbit-cn`（23 模型）或 `tabbit-global`（34 模型）区域的任意模型，直接对话与工具调用。
+
+无需 Python / Docker / 独立常驻网关：内置网关随插件启停，只监听本机回环随机端口，账号保存在 `~/.dsh/plugins/dsh-connect-tabbit/accounts.json`（0600 / 用户 ACL）。
+
+## 目录
+
+| 章节 | 内容 |
+|---|---|
+| [登录与账号池](#登录与账号池) | 隔离登录窗口、Cookie / JWT 导入、多账号池 |
+| [对话与工具](#对话与工具) | 工具调用协议、CDATA 信封、四道防线 |
+| [长任务](#长任务) | 流保活、事件续接、有界修正 |
+| [额度与消耗](#额度与消耗) | 官方计数 vs 本地估算、模型倍率、每日签到 |
+| [架构与兼容](#架构与兼容) | 进程内网关、外部模式、安全边界 |
+| [国际版上手](docs/global-edition-setup.md) | 浏览器安装、双登录路径、验证记录 |
+| [接口证据](docs/tabbit-api-evidence.md) | 真实账号验证记录 |
+
+**2026-10-24 实测记录**：76/76 单元测试通过；国内版全链路真实补全通过（网关→shim→DSH 适配器，23 模型 / 1 账号）；**国际版全链路真实补全通过**（34 模型 / 1 账号，浏览器登录态导入→账号池→网关→shim→适配器）；**真实工具调用往返双版本一次通过**（glm-5-3-flashx 含引号代码参数保真，未触发修正循环）；每日签到真实领取成功并二次确认（详见 [国际版上手](docs/global-edition-setup.md)）。
+
+插件内置网关，随 DSH 自动启动、随插件关闭，无需安装 Python / Docker，也不需要手动运行 8800 / 8801 服务。国内版与国际版使用独立的账号池、随机本机端口和随机密钥。国际版需要独立的国际版账号，国内版登录态不能通用。
 
 ## 登录与账号池
 
