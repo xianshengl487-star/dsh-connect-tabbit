@@ -1,4 +1,11 @@
-# DSH Connect Tabbit 0.4.2
+# DSH Connect Tabbit
+
+> **Turn your Tabbit browser quota into a free local model gateway for DeepSeek Harness — CN & Global editions, 20+ models, zero setup.**
+> 把 Tabbit 浏览器的模型额度变成 DeepSeek Harness 的内置网关：国内版 + 国际版、20+ 模型、Token 统计、每日签到、长任务续接。
+
+![tests](https://img.shields.io/badge/tests-72%2F72-brightgreen) ![live](https://img.shields.io/badge/live%20verified-CN%20full--chain-blue) ![editions](https://img.shields.io/badge/editions-CN%20%2B%20Global-orange) ![license](https://img.shields.io/badge/license-MIT-black)
+
+**2026-10-24 实测记录**：72/72 单元测试通过；国内版全链路真实补全通过（网关→shim→DSH 适配器，23 模型 / 1 账号）；每日签到真实领取成功并二次确认；国际版双网关架构与目录缓存（20 模型）验证通过。
 
 插件内置网关，随 DSH 自动启动、随插件关闭，无需安装 Python / Docker，也不需要手动运行 8800 / 8801 服务。国内版与国际版使用独立的账号池、随机本机端口和随机密钥。
 
