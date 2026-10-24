@@ -135,7 +135,7 @@ def background(t: float, section: int):
     for y in range(90, 660, 48):
         d.line((42, y, W - 42, y), fill="#192123", width=1)
     text(d, (54, 36), "DSH CONNECT  /  TABBIT", 15, MUTED, latin=True, bold=True)
-    text(d, (W - 54, 36), "THIRD-PARTY PLUGIN     0.4.0", 14, MUTED,
+    text(d, (W - 54, 36), "THIRD-PARTY PLUGIN     0.4.3", 14, MUTED,
          anchor="ra", latin=True)
     d.line((54, 62, W - 54, 62), fill=LINE, width=1)
     # Progress is presented as a single editorial timeline, not slide pagination.
@@ -151,11 +151,11 @@ def scene_open(t: float):
     img = background(t, 1)
     d = ImageDraw.Draw(img)
     p = ease(t / 1.2)
-    text(d, (82, 142 + (1 - p) * 22), "让 Tabbit", 72, PAPER, bold=True)
-    text(d, (82, 226 + (1 - p) * 22), "接上 DSH 的工具", 68, LIME, bold=True)
-    text(d, (88, 338), "账号池 · 内置网关 · 长任务续接", 25, MUTED)
+    text(d, (82, 142 + (1 - p) * 22), "白嫖 34 个大模型", 72, PAPER, bold=True)
+    text(d, (82, 226 + (1 - p) * 22), "DSH × Tabbit 一键直连", 68, LIME, bold=True)
+    text(d, (88, 338), "国内版 + 国际版 · Token 统计 · 每日签到 · 长任务续接", 25, MUTED)
     pill(d, (88, 407), "DSH CONNECT TABBIT", color=INK, bg=LIME, size=16)
-    text(d, (88, 510), "把网页模型，接进真正的工作流。", 24, WHITE)
+    text(d, (88, 510), "把浏览器的模型额度，变成你的免费本地网关。", 24, WHITE)
     # Original abstract routing emblem.
     cx, cy = 978, 340
     orbit = 154 + 5 * math.sin(t * 1.3)
@@ -266,7 +266,7 @@ def scene_models(t: float):
     pill(d, (588, 249), "国内版", color=INK, bg=LIME, size=14, width=84)
     pill(d, (682, 249), "国际版", color=MUTED, bg=PANEL2, size=14, width=84)
     text(d, (105, 326), "模型选择", 17, MUTED, bold=True)
-    for i, (name, mult, col) in enumerate([("模型 A", "倍率可见", TEAL), ("模型 B", "倍率可见", LIME), ("更多模型…", "目录动态刷新", GOLD)]):
+    for i, (name, mult, col) in enumerate([("Kimi-K3 · 1M 上下文", "倍率可见", TEAL), ("DeepSeek-V4-Pro", "倍率可见", LIME), ("GLM / Qwen / MiMo · 34 个", "目录动态刷新", GOLD)]):
         yy = 354 + i * 57
         d.rounded_rectangle((102, yy, 768, yy + 45), radius=11, fill=PANEL2 if i != 1 else "#35443d",
                             outline=LINE)
@@ -409,8 +409,8 @@ def scene_limits(t: float):
     d.rounded_rectangle((77, 445, 1204, 582), radius=20, fill="#2a2521", outline="#655a42", width=2)
     d.ellipse((104, 475, 144, 515), fill=GOLD)
     centered(d, (124, 495), "!", 25, INK, latin=True, bold=True)
-    text(d, (169, 478), "国际版需独立账号；当前版本尚未完成真实账号调用验证。", 21, WHITE, bold=True)
-    text(d, (169, 528), "国内版与国际版账号、额度和模型目录彼此独立。", 18, MUTED)
+    text(d, (169, 478), "国际版需独立账号；2026-10-24 已完成国际版真实账号全链路验证。", 21, WHITE, bold=True)
+    text(d, (169, 528), "国内版与国际版账号、额度和模型目录彼此独立（34 模型 / e2e 通过）。", 18, MUTED)
     return img
 
 
@@ -431,7 +431,8 @@ def scene_finish(t: float):
     panel(d, (78, 367, 1204, 589), fill=PAPER, outline="#fff4d9")
     text(d, (111, 411), "DSH CONNECT", 18, "#5b655c", latin=True, bold=True)
     text(d, (107, 471), "TABBIT", 52, INK, latin=True, bold=True)
-    text(d, (109, 526), "0.4.0  ·  MIT  ·  第三方插件", 17, "#5b655c", latin=True)
+    text(d, (109, 526), "0.4.3  ·  MIT  ·  第三方插件", 17, "#5b655c", latin=True)
+    text(d, (109, 556), "github.com/xianshengl487-star/dsh-connect-tabbit", 15, "#7c8a7f", latin=True)
     # abstract loop icon
     cx, cy = 1032, 480
     d.rounded_rectangle((cx - 72, cy - 49, cx - 6, cy + 49), radius=20, outline="#94b75c", width=10)
