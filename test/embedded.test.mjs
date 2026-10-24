@@ -201,3 +201,17 @@ test('an unrepairable call JSON still fails as malformed_json and repairs never 
   assert.throws(() => parseResponse('<dsh_function_call>{"name":"open_page","arguments":{"other":\n"v"}}</dsh_function_call>', fns),
     e => e.code === 'tool_protocol_error')
 })
+
+test('unescaped quotes inside a code-like string value are repaired by the quote heuristic', () => {
+  const fns = activeFunctions(tools)
+  const raw = '<dsh_function_call>{"name":"open_page","arguments":{"url":"run print("hello world") now"}}</dsh_function_call>'
+  const parsed = parseResponse(raw, fns)
+  assert.equal(parsed.reason, 'tool_calls')
+  assert.equal(JSON.parse(parsed.message.tool_calls[0].function.arguments).url, 'run print("hello world") now')
+})
+
+test('a call JSON no repair strategy can fix still reports malformed_json with a raw snippet', () => {
+  const fns = activeFunctions(tools)
+  assert.throws(() => parseResponse('<dsh_function_call>{"name":"open_page","arguments":{"url":cannot parse at all}}</dsh_function_call>', fns),
+    e => e.code === 'tool_protocol_error' && e.detail === 'malformed_json' && /cannot parse/.test(e.rawSnippet ?? ''))
+})
