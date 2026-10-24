@@ -1,0 +1,74 @@
+{
+  "name": "dsh-connect-tabbit",
+  "displayName": "DSH Connect Tabbit",
+  "description": "内置网关自动接入 Tabbit 国内版与国际版：账号登录与导入、多账号池、周期额度、模型用量倍率、每日签到和工具调用。",
+  "version": "0.4.3",
+  "author": "dsh-connect-tabbit",
+  "license": "MIT",
+  "keywords": [
+    "dsh-plugin",
+    "deepseek-harness",
+    "deepseek",
+    "tabbit",
+    "tabbit2api",
+    "model-provider",
+    "cordis"
+  ],
+  "type": "module",
+  "engines": {
+    "node": "^22.19.0 || >=24.0.0"
+  },
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "node test/smoke.mjs && node test/client-smoke.mjs && node test/host-smoke.mjs && node --test test/login.test.mjs test/quota.test.mjs test/embedded.test.mjs test/resilience.test.mjs test/continuation.test.mjs test/context.test.mjs test/stability.test.mjs && node test/client-login.mjs",
+    "test:e2e": "node test/e2e-fullchain.mjs",
+    "test:e2e:gateway": "node test/e2e-gateway.mjs"
+  },
+  "exports": {
+    ".": {
+      "default": "./lib/index.js"
+    },
+    "./client": "./lib/client.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "cordis.patch.yml",
+    "README.md",
+    "docs",
+    "LICENSE"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-settings",
+        "@deepseek-ai/dsh-client-ui-slots",
+        "@deepseek-ai/dsh-client-ui-settings-plugins",
+        "@deepseek-ai/dsh-client-locale"
+      ],
+      "platform": "web"
+    }
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": ">=4.0.2 <5.0.0",
+    "@deepseek-ai/dsh-llm": ">=0.1.5-0 <0.3.0-0",
+    "@deepseek-ai/dsh-llm-pi-ai": ">=0.1.5-0 <0.3.0-0",
+    "@deepseek-ai/dsh-settings": ">=0.1.5-0 <0.3.0-0",
+    "@deepseek-ai/dsh-home-paths": ">=0.1.5-0 <0.3.0-0",
+    "@deepseek-ai/dsh-host-webserver": ">=0.1.5-0 <0.3.0-0",
+    "@deepseek-ai/dsh-client-locale": ">=0.1.5-0 <0.3.0-0",
+    "@deepseek-ai/dsh-client-ui-settings": ">=0.1.5-0 <0.3.0-0",
+    "@deepseek-ai/dsh-client-ui-slots": ">=0.1.5-0 <0.3.0-0",
+    "@deepseek-ai/schemastery": "^3.18.2",
+    "@earendil-works/pi-ai": "^0.85.1"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/cordis": {
+      "optional": true
+    }
+  }
+}
