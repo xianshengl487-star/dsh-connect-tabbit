@@ -180,3 +180,24 @@ test('only missing v3 endpoint falls back, foreign redirects and incomplete stre
   })
   await assert.rejects(async () => { for await (const _ of rejected.completion('test', '默认')) {} }, e => e.code === 'tabbit_request_rejected' && e.status === 400)
 })
+
+test('raw newlines and trailing commas inside call JSON are repaired without burning the correction budget', () => {
+  const fns = activeFunctions(tools)
+  const rawNewline = '<dsh_function_call>{"name":"open_page","arguments":{"url":"https://a.example/\npath?q=1"}}</dsh_function_call>'
+  const parsed = parseResponse(rawNewline, fns)
+  assert.equal(parsed.reason, 'tool_calls')
+  assert.equal(parsed.message.tool_calls[0].function.name, 'open_page')
+  assert.equal(JSON.parse(parsed.message.tool_calls[0].function.arguments).url, 'https://a.example/\npath?q=1')
+  const trailing = '<dsh_function_call>{"name":"open_page","arguments":{"url":"https://a.example",}}</dsh_function_call>'
+  assert.equal(parseResponse(trailing, fns).reason, 'tool_calls')
+})
+
+test('an unrepairable call JSON still fails as malformed_json and repairs never bypass schema checks', () => {
+  const fns = activeFunctions(tools)
+  assert.throws(() => parseResponse('<dsh_function_call>{"name":"open_page","arguments":{"url":true false}}</dsh_function_call>', fns),
+    e => e.code === 'tool_protocol_error' && e.detail === 'malformed_json')
+  assert.throws(() => parseResponse('<dsh_function_call>{"name":"ghost","arguments":{"url":\n"https://a.example"}}</dsh_function_call>', fns),
+    e => e.code === 'tool_protocol_error')
+  assert.throws(() => parseResponse('<dsh_function_call>{"name":"open_page","arguments":{"other":\n"v"}}</dsh_function_call>', fns),
+    e => e.code === 'tool_protocol_error')
+})
