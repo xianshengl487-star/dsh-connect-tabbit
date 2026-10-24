@@ -17,5 +17,25 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
+      - name: Install pnpm
+        run: npm install -g pnpm@9
+      # The plugin's peers are the DSH host packages; the public registry keeps
+      # the matching line under the 0.1.5-rc tag (the plain `latest` tag is an
+      # older rc). npm's resolver trips over these prerelease peer ranges, pnpm
+      # installs them cleanly.
+      - name: Install host peer dependencies
+        run: >-
+          pnpm add --ignore-workspace -D
+          "@deepseek-ai/cordis@4.0.5"
+          "@deepseek-ai/schemastery@3.18.5"
+          "@deepseek-ai/dsh-home-paths@0.1.5-rc.3"
+          "@deepseek-ai/dsh-llm@0.1.5-rc.3"
+          "@deepseek-ai/dsh-llm-pi-ai@0.1.5-rc.3"
+          "@deepseek-ai/dsh-settings@0.1.5-rc.3"
+          "@deepseek-ai/dsh-host-webserver@0.1.5-rc.3"
+          "@deepseek-ai/dsh-client-locale@0.1.5-rc.3"
+          "@deepseek-ai/dsh-client-ui-settings@0.1.5-rc.3"
+          "@deepseek-ai/dsh-client-ui-slots@0.1.5-rc.3"
+          "@earendil-works/pi-ai@0.85.1"
       - name: Run test suite
         run: npm test
