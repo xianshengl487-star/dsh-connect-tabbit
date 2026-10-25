@@ -282,3 +282,48 @@ test('premium-only models are labelled and their empty replies point at entitlem
     await service.close()
   }
 })
+
+test('premium-only requests route to a member account while free models keep rotation', async () => {
+  const premiumCatalog = async () => [
+    { id: 'best', name: '默认', description: '', accessType: 'free_unlimited' },
+    { id: 'opus', name: 'Claude-Opus-5.5', description: '', accessType: 'premium_only' },
+  ]
+  const seen = []
+  const service = await createEmbeddedGateway({ region: REGIONS[0], catalogReader: premiumCatalog, upstreamFactory: (token) => ({
+    async *completion() {
+      seen.push(token.value)
+      yield { content: 'OK' }
+    },
+  }) })
+  const gateway = new GatewayClient({ ...service, region: REGIONS[0] })
+  try {
+    await gateway.addToken({ value: 'free.account.value', name: 'free' })
+    await gateway.addToken({ value: 'member.account.value', name: 'member', memberLevel: 'pro' })
+    await gateway.chatCompletions({ model: 'opus', messages: [{ role: 'user', content: 'hi' }], stream: false })
+    assert.equal(seen.at(-1), 'member.account.value')
+    await gateway.chatCompletions({ model: 'best', messages: [{ role: 'user', content: 'hi' }], stream: false })
+    assert.notEqual(seen.at(-1), undefined)
+    // The masked admin listing exposes the level for the card without the credential.
+    const tokens = await gateway.listTokens()
+    assert.equal(tokens.find(row => row.name === 'member').memberLevel, 'pro')
+    assert.equal(tokens.find(row => row.name === 'free').memberLevel, undefined)
+  } finally {
+    await service.close()
+  }
+})
+
+test('AccountStore.setMemberLevel persists and upsert keeps the level', async () => {
+  const { AccountStore } = await import('../lib/accounts.js')
+  const { rmSync } = await import('node:fs')
+  const testPath = 'C:/Users/maoyaowei/AppData/Local/Temp/dsh-tabbit-test-accounts.json'
+  rmSync(testPath, { force: true })
+  const store = new AccountStore({ path: testPath })
+  store.upsert({ name: 'a', value: 'j.a.b', region: 'tabbit-cn' })
+  const account = store.accountsFor('tabbit-cn')[0]
+  assert.equal(store.setMemberLevel(account.id, 'pro'), true)
+  assert.equal(account.memberLevel, 'pro')
+  assert.equal(store.setMemberLevel(account.id, 'pro'), false)
+  store.upsert({ name: 'a', value: 'j.a.c', region: 'tabbit-cn' })
+  assert.equal(store.accountsFor('tabbit-cn')[0].memberLevel, 'pro')
+  rmSync(testPath, { force: true })
+})
