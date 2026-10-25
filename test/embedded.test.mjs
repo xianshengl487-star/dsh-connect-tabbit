@@ -327,3 +327,45 @@ test('AccountStore.setMemberLevel persists and upsert keeps the level', async ()
   assert.equal(store.accountsFor('tabbit-cn')[0].memberLevel, 'pro')
   rmSync(testPath, { force: true })
 })
+
+test('empty-body retries rotate to another account of the pool', async () => {
+  const seen = []
+  const service = await createEmbeddedGateway({ region: REGIONS[0], catalogReader, upstreamFactory: (token) => ({
+    async *completion() {
+      seen.push(token.value)
+      if (token.value === 'first.empty.account') return // this account always answers empty
+      yield { content: 'OK' }
+    },
+  }) })
+  const gateway = new GatewayClient({ ...service, region: REGIONS[0] })
+  try {
+    await gateway.addToken({ value: 'first.empty.account', name: 'empty-one' })
+    await gateway.addToken({ value: 'second.good.account', name: 'good-one' })
+    const result = await (await gateway.chatCompletions({ model: 'best', messages: [{ role: 'user', content: 'hi' }], tools, stream: false })).json()
+    assert.equal(result.choices[0].message.content, 'OK')
+    assert.equal(seen[0], 'first.empty.account')
+    assert.equal(seen.at(-1), 'second.good.account')
+  } finally {
+    await service.close()
+  }
+})
+
+test('a 401 on a premium model with a non-member account does not expire the token', async () => {
+  const { TabbitError } = await import('../lib/errors.js')
+  const premiumCatalog = async () => [
+    { id: 'best', name: '默认', description: '', accessType: 'free_unlimited' },
+    { id: 'opus', name: 'Opus', description: '', accessType: 'premium_only' },
+  ]
+  const service = await createEmbeddedGateway({ region: REGIONS[0], catalogReader: premiumCatalog, upstreamFactory: () => ({
+    async *completion() { throw new TabbitError('unauthorized', { code: 'tabbit_unauthorized' }) },
+  }) })
+  const gateway = new GatewayClient({ ...service, region: REGIONS[0] })
+  try {
+    await gateway.addToken({ value: 'free.account.value', name: 'free' })
+    await assert.rejects(() => gateway.chatCompletions({ model: 'opus', messages: [{ role: 'user', content: 'hi' }], stream: false }))
+    const tokens = await gateway.listTokens()
+    assert.notEqual(tokens[0].status, 'expired')
+  } finally {
+    await service.close()
+  }
+})
