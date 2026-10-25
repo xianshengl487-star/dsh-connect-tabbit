@@ -215,3 +215,45 @@ test('a call JSON no repair strategy can fix still reports malformed_json with a
   assert.throws(() => parseResponse('<dsh_function_call>{"name":"open_page","arguments":{"url":cannot parse at all}}</dsh_function_call>', fns),
     e => e.code === 'tool_protocol_error' && e.detail === 'malformed_json' && /cannot parse/.test(e.rawSnippet ?? ''))
 })
+
+test('empty upstream replies retry on their own budget and report the filter-shaped cause', async () => {
+  let calls = 0
+  const service = await createEmbeddedGateway({ region: REGIONS[0], catalogReader, upstreamFactory: () => ({
+    async *completion() {
+      calls += 1
+      // Every attempt comes back completely empty, like an upstream content filter.
+    },
+  }) })
+  const gateway = new GatewayClient({ ...service, region: REGIONS[0] })
+  try {
+    await gateway.addToken({ value: 'fake.credential.value', name: 'a' })
+    await assert.rejects(
+      () => gateway.chatCompletions({ model: 'best', messages: [{ role: 'user', content: '做一个蜘蛛侠模型' }], tools, stream: false }),
+      error => /空白/.test(error.message) && /过滤/.test(error.message),
+    )
+    // 1 initial attempt + 2 empty retries; the format budget must stay untouched.
+    assert.equal(calls, 3)
+  } finally {
+    await service.close()
+  }
+})
+
+test('one empty reply followed by a real call still succeeds', async () => {
+  let calls = 0
+  const service = await createEmbeddedGateway({ region: REGIONS[0], catalogReader, upstreamFactory: () => ({
+    async *completion() {
+      calls += 1
+      if (calls === 1) return
+      yield { content: '<dsh_function_call>{"name":"open_page","arguments":{"url":"https://www.bilibili.com"}}</dsh_function_call>' }
+    },
+  }) })
+  const gateway = new GatewayClient({ ...service, region: REGIONS[0] })
+  try {
+    await gateway.addToken({ value: 'fake.credential.value', name: 'a' })
+    const result = await (await gateway.chatCompletions({ model: 'best', messages: [{ role: 'user', content: '打开B站' }], tools, stream: false })).json()
+    assert.equal(result.choices[0].finish_reason, 'tool_calls')
+    assert.equal(calls, 2)
+  } finally {
+    await service.close()
+  }
+})
