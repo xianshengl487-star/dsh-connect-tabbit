@@ -2,7 +2,7 @@
   "name": "dsh-connect-tabbit",
   "displayName": "DSH Connect Tabbit",
   "description": "内置网关自动接入 Tabbit 国内版与国际版：账号登录与导入、多账号池、周期额度、模型用量倍率、每日签到和工具调用。",
-  "version": "0.4.10",
+  "version": "0.4.11",
   "author": "dsh-connect-tabbit",
   "license": "MIT",
   "keywords": [

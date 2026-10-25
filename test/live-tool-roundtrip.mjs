@@ -64,7 +64,7 @@ async function chat(baseUrl, apiKey, messages, withTools) {
   return { text, reasoning, calls: [...calls.values()] }
 }
 
-const embedded = await createEmbeddedGateway({ region })
+const embedded = await createEmbeddedGateway({ region, logger: { info: m => console.error('[gw]', String(m).slice(0, 200)), warn: m => console.error('[gw-warn]', String(m).slice(0, 200)) } })
 let client
 try {
   client = new GatewayClient({ region, baseUrl: embedded.baseUrl, apiKey: embedded.apiKey, adminPassword: embedded.adminPassword })
@@ -89,7 +89,7 @@ try {
     userMessage,
     { role: 'assistant', content: null, tool_calls: [{ id: call.id || 'call_1', type: 'function', function: { name: call.name, arguments: call.arguments } }] },
     { role: 'tool', tool_call_id: call.id || 'call_1', content: JSON.stringify({ saved: true, path: 'C:/tmp/notes/quote-test.txt', bytes: args.content.length }) },
-  ], false)
+  ], true)
   if (!turn2.text.trim()) throw new Error('model did not finish the turn after the tool result')
   console.log(JSON.stringify({ phase: 'turn2-ok', finalText: turn2.text.trim().slice(0, 160) }))
   console.log('PASS: live tool round trip with quote-bearing code arguments')
