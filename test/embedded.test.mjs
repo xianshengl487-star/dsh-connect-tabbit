@@ -257,3 +257,28 @@ test('one empty reply followed by a real call still succeeds', async () => {
     await service.close()
   }
 })
+
+test('premium-only models are labelled and their empty replies point at entitlement', async () => {
+  const premiumCatalog = async () => [
+    { id: 'best', name: '默认', description: 'free default', accessType: 'free_unlimited' },
+    { id: 'claude-opus-5-5', name: 'Claude-Opus-5.5', description: 'flagship', accessType: 'premium_only' },
+  ]
+  let calls = 0
+  const service = await createEmbeddedGateway({ region: REGIONS[0], catalogReader: premiumCatalog, upstreamFactory: () => ({
+    async *completion() { calls += 1 },
+  }) })
+  const gateway = new GatewayClient({ ...service, region: REGIONS[0] })
+  try {
+    await gateway.addToken({ value: 'fake.credential.value', name: 'a' })
+    const models = await gateway.listModels()
+    assert.equal(models.find(row => row.id === 'claude-opus-5-5').description.startsWith('[Premium]'), true)
+    assert.equal(models.find(row => row.id === 'best').description.startsWith('[Free'), true)
+    await assert.rejects(
+      () => gateway.chatCompletions({ model: 'claude-opus-5-5', messages: [{ role: 'user', content: '你好' }], tools, stream: false }),
+      error => /会员专属/.test(error.message) && /premium_only/.test(error.message),
+    )
+    assert.equal(calls, 3)
+  } finally {
+    await service.close()
+  }
+})
